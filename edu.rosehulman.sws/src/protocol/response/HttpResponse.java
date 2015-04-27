@@ -19,28 +19,30 @@
  * 
  */
  
-package protocol;
+package protocol.response;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.OutputStream;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+
+import protocol.Protocol;
 
 /**
  * Represents a response object for HTTP.
  * 
  * @author Chandan R. Rupakheti (rupakhet@rose-hulman.edu)
  */
-public class HttpResponse {
+public abstract class HttpResponse {
 	private String version;
-	private int status;
-	private String phrase;
+	protected int status;
+	protected String phrase;
 	private Map<String, String> header;
 	private File file;
 
+	
 	
 	/**
 	 * Constructs a HttpResponse object using supplied parameter
@@ -51,12 +53,22 @@ public class HttpResponse {
 	 * @param header The header field map.
 	 * @param file The file to be sent.
 	 */
-	public HttpResponse(String version, int status, String phrase, Map<String, String> header, File file) {
-		this.version = version;
-		this.status = status;
-		this.phrase = phrase;
-		this.header = header;
+	public HttpResponse(File file, String connection) {
+		this.version = Protocol.VERSION;
+		this.header = new HashMap<String, String>();
 		this.file = file;
+		// Lets add Connection header
+		this.put(Protocol.CONNECTION, connection);
+
+		// Lets add current date
+		Date date = Calendar.getInstance().getTime();
+		this.put(Protocol.DATE, date.toString());
+		
+		// Lets add server info
+		this.put(Protocol.Server, Protocol.getServerInfo());
+
+		// Lets add extra header with provider info
+		this.put(Protocol.PROVIDER, Protocol.AUTHOR);
 	}
 
 	/**
@@ -112,53 +124,7 @@ public class HttpResponse {
 		this.header.put(key, value);
 	}
 	
-	/**
-	 * Writes the data of the http response object to the output stream.
-	 * 
-	 * @param outStream The output stream
-	 * @throws Exception
-	 */
-	public void write(OutputStream outStream) throws Exception {
-		BufferedOutputStream out = new BufferedOutputStream(outStream, Protocol.CHUNK_LENGTH);
-
-		// First status line
-		String line = this.version + Protocol.SPACE + this.status + Protocol.SPACE + this.phrase + Protocol.CRLF;
-		out.write(line.getBytes());
-		
-		// Write header fields if there is something to write in header field
-		if(header != null && !header.isEmpty()) {
-			for(Map.Entry<String, String> entry : header.entrySet()) {
-				String key = entry.getKey();
-				String value = entry.getValue();
-				
-				// Write each header field line
-				line = key + Protocol.SEPERATOR + Protocol.SPACE + value + Protocol.CRLF;
-				out.write(line.getBytes());
-			}
-		}
-
-		// Write a blank line
-		out.write(Protocol.CRLF.getBytes());
-
-		// We are reading a file
-		if(this.getStatus() == Protocol.OK_CODE && file != null) {
-			// Process text documents
-			FileInputStream fileInStream = new FileInputStream(file);
-			BufferedInputStream inStream = new BufferedInputStream(fileInStream, Protocol.CHUNK_LENGTH);
-			
-			byte[] buffer = new byte[Protocol.CHUNK_LENGTH];
-			int bytesRead = 0;
-			// While there is some bytes to read from file, read each chunk and send to the socket out stream
-			while((bytesRead = inStream.read(buffer)) != -1) {
-				out.write(buffer, 0, bytesRead);
-			}
-			// Close the file input stream, we are done reading
-			inStream.close();
-		}
-		
-		// Flush the data so that outStream sends everything through the socket 
-		out.flush();
-	}
+	
 	
 	@Override
 	public String toString() {

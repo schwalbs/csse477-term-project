@@ -27,6 +27,14 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import protocol.Protocol;
+import protocol.response.HttpResponse200;
+import protocol.response.HttpResponse301;
+import protocol.response.HttpResponse400;
+import protocol.response.HttpResponse404;
+import protocol.response.HttpResponse505;
+import protocol.response.HttpResponseFactory;
+
 /**
  * This represents a welcoming server for the incoming
  * TCP request from a HTTP client such as a web browser. 
@@ -54,6 +62,7 @@ public class Server implements Runnable {
 		this.connections = 0;
 		this.serviceTime = 0;
 		this.window = window;
+		setResponseMappings();
 	}
 
 	/**
@@ -138,6 +147,15 @@ public class Server implements Runnable {
 			window.showSocketException(e);
 		}
 	}
+	
+	public void setResponseMappings(){
+		HttpResponseFactory.addResponseType(Protocol.OK_CODE, HttpResponse200.class);
+		HttpResponseFactory.addResponseType(Protocol.MOVED_PERMANENTLY_CODE, HttpResponse301.class);
+		HttpResponseFactory.addResponseType(Protocol.BAD_REQUEST_CODE, HttpResponse400.class);
+		HttpResponseFactory.addResponseType(Protocol.NOT_FOUND_CODE, HttpResponse404.class);
+		HttpResponseFactory.addResponseType(Protocol.NOT_SUPPORTED_CODE, HttpResponse505.class);
+	}
+	
 	
 	/**
 	 * Stops the server from listening further.
