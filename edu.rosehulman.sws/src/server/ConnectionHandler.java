@@ -22,6 +22,7 @@
 package server;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -231,23 +232,10 @@ public class ConnectionHandler implements Runnable {
 				File file = new File(rootDirectory + uri);
 				// Check if the file exists
 				if(file.exists()) {
-					if(file.isDirectory()) {
-						// Look for default index.html file in a directory
-						String location = rootDirectory + uri + System.getProperty("file.separator") + Protocol.DEFAULT_FILE;
-						file = new File(location);
-						if(file.exists()) {
-							// Lets create 200 OK response
-							response = HttpResponseFactory.createResponse(Protocol.OK_CODE, file, Protocol.CLOSE);
-						}
-						else {
-							// File does not exist so lets create 404 file not found code
-							response = HttpResponseFactory.createResponse(Protocol.NOT_FOUND_CODE, null, Protocol.CLOSE);
-						}
-					}
-					else { // Its a file
-						// Lets create 200 OK response
-						response = HttpResponseFactory.createResponse(Protocol.OK_CODE, file, Protocol.CLOSE);
-					}
+					FileWriter writer = new FileWriter(file, true);
+					writer.write(request.getBody());
+					writer.close();
+					response = HttpResponseFactory.createResponse(Protocol.OK_CODE, file, Protocol.CLOSE);
 				}
 				else {
 					// File does not exist so lets create 404 file not found code
