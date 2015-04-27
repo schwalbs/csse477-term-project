@@ -143,11 +143,7 @@ public class ConnectionHandler implements Runnable {
 				// "request.version" string ignoring the case of the letters in both strings
 				// TODO: Fill in the rest of the code here
 			}
-			else if(request.getMethod().equalsIgnoreCase(Protocol.GET)) {
-//				Map<String, String> header = request.getHeader();
-//				String date = header.get("if-modified-since");
-//				String hostName = header.get("host");
-//				
+			else if(request.getMethod().equalsIgnoreCase(Protocol.GET)) {				
 				// Handling GET request here
 				// Get relative URI path from request
 				String uri = request.getUri();
@@ -181,48 +177,25 @@ public class ConnectionHandler implements Runnable {
 				}
 				
 			}
-			else if(request.getMethod().equalsIgnoreCase(Protocol.POST)) {
-//				Map<String, String> header = request.getHeader();
-//				String date = header.get("if-modified-since");
-//				String hostName = header.get("host");
-//				
-				// Handling GET request here
+			else if(request.getMethod().equalsIgnoreCase(Protocol.POST)) {				
+				// Handling POST request here
 				// Get relative URI path from request
 				String uri = request.getUri();
 				// Get root directory path from server
 				String rootDirectory = server.getRootDirectory();
 				// Combine them together to form absolute file path
 				File file = new File(rootDirectory + uri);
-				// Check if the file exists
-				if(file.exists()) {
-					if(file.isDirectory()) {
-						// Look for default index.html file in a directory
-						String location = rootDirectory + uri + System.getProperty("file.separator") + Protocol.DEFAULT_FILE;
-						file = new File(location);
-						if(file.exists()) {
-							// Lets create 200 OK response
-							response = HttpResponseFactory.createResponse(Protocol.OK_CODE, file, Protocol.CLOSE);
-						}
-						else {
-							// File does not exist so lets create 404 file not found code
-							response = HttpResponseFactory.createResponse(Protocol.NOT_FOUND_CODE, null, Protocol.CLOSE);
-						}
-					}
-					else { // Its a file
-						// Lets create 200 OK response
-						response = HttpResponseFactory.createResponse(Protocol.OK_CODE, file, Protocol.CLOSE);
-					}
-				}
-				else {
-					// File does not exist so lets create 404 file not found code
+				
+				if(!file.isDirectory()){
+					FileWriter writer = new FileWriter(file, false);
+					writer.write(request.getBody());
+					writer.close();
+					response = HttpResponseFactory.createResponse(Protocol.OK_CODE, null, Protocol.CLOSE);
+				} else {
 					response = HttpResponseFactory.createResponse(Protocol.NOT_FOUND_CODE, null, Protocol.CLOSE);
 				}
 			}
 			else if(request.getMethod().equalsIgnoreCase(Protocol.PUT)) {
-//				Map<String, String> header = request.getHeader();
-//				String date = header.get("if-modified-since");
-//				String hostName = header.get("host");
-//				
 				// Handling GET request here
 				// Get relative URI path from request
 				String uri = request.getUri();
@@ -231,24 +204,19 @@ public class ConnectionHandler implements Runnable {
 				// Combine them together to form absolute file path
 				File file = new File(rootDirectory + uri);
 				// Check if the file exists
-				if(file.exists()) {
+				if(!file.isDirectory()){
 					FileWriter writer = new FileWriter(file, true);
 					writer.write(request.getBody());
 					writer.close();
-					response = HttpResponseFactory.createResponse(Protocol.OK_CODE, file, Protocol.CLOSE);
-				}
-				else {
-					// File does not exist so lets create 404 file not found code
+					response = HttpResponseFactory.createResponse(Protocol.OK_CODE, null, Protocol.CLOSE);
+				} else {
 					response = HttpResponseFactory.createResponse(Protocol.NOT_FOUND_CODE, null, Protocol.CLOSE);
 				}
 				
+				
 			}
 			else if(request.getMethod().equalsIgnoreCase(Protocol.DELETE)) {
-//				Map<String, String> header = request.getHeader();
-//				String date = header.get("if-modified-since");
-//				String hostName = header.get("host");
-//				
-				// Handling GET request here
+				// Handling DELETE request here
 				// Get relative URI path from request
 				String uri = request.getUri();
 				// Get root directory path from server
@@ -256,30 +224,13 @@ public class ConnectionHandler implements Runnable {
 				// Combine them together to form absolute file path
 				File file = new File(rootDirectory + uri);
 				// Check if the file exists
-				if(file.exists()) {
-					if(file.isDirectory()) {
-						// Look for default index.html file in a directory
-						String location = rootDirectory + uri + System.getProperty("file.separator") + Protocol.DEFAULT_FILE;
-						file = new File(location);
-						if(file.exists()) {
-							// Lets create 200 OK response
-							response = HttpResponseFactory.createResponse(Protocol.OK_CODE, file, Protocol.CLOSE);
-						}
-						else {
-							// File does not exist so lets create 404 file not found code
-							response = HttpResponseFactory.createResponse(Protocol.NOT_FOUND_CODE, null, Protocol.CLOSE);
-						}
+				if(file.exists()){
+					if(file.isFile() && file.delete()){
+						response = HttpResponseFactory.createResponse(Protocol.OK_CODE, null, Protocol.CLOSE);						
 					}
-					else { // Its a file
-						// Lets create 200 OK response
-						response = HttpResponseFactory.createResponse(Protocol.OK_CODE, file, Protocol.CLOSE);
-					}
+				} else {
+					response = HttpResponseFactory.createResponse(Protocol.NOT_FOUND_CODE, null, Protocol.CLOSE);					
 				}
-				else {
-					// File does not exist so lets create 404 file not found code
-					response = HttpResponseFactory.createResponse(Protocol.NOT_FOUND_CODE, null, Protocol.CLOSE);
-				}
-				
 			}
 		}
 		catch(Exception e) {
