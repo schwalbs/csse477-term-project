@@ -54,6 +54,7 @@ import servlet.Servlet;
  */
 public class PluginLoader  implements Runnable{
 		public static final int POLL_INTERVAL = 5000;
+		public static final File PLUGIN_DIR = new File("plugins");
 		public boolean stop = false;
 		
 		private PluginManager pluginManager;
@@ -68,12 +69,10 @@ public class PluginLoader  implements Runnable{
 		}
 		
 		@SuppressWarnings("unchecked")
-		private void load(){
-
-			File pluginRoot = new File("plugins");		
-			if(pluginRoot.exists() && pluginRoot.isDirectory()){
+		private void load(){	
+			if(PLUGIN_DIR.exists() && PLUGIN_DIR.isDirectory()){
 				//go to all the plugin directories
-				for(File pluginDir :  pluginRoot.listFiles()){				
+				for(File pluginDir :  PLUGIN_DIR.listFiles()){				
 					//make sure the plugin directory is actually a directory
 					if(!pluginDir.isDirectory()){
 						System.out.println("ERROR " + pluginDir.getAbsolutePath() + " isn't a directory");
