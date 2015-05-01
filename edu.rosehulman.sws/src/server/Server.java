@@ -27,6 +27,8 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import plugin.PluginLoader;
+import plugin.PluginManager;
 import protocol.Protocol;
 import protocol.response.HttpResponse200;
 import protocol.response.HttpResponse301;
@@ -50,6 +52,9 @@ public class Server implements Runnable {
 	private long connections;
 	private long serviceTime;
 	
+	private PluginManager pluginManager;
+	private PluginLoader pluginLoader;
+	
 	private WebServer window;
 	/**
 	 * @param rootDirectory
@@ -62,6 +67,10 @@ public class Server implements Runnable {
 		this.connections = 0;
 		this.serviceTime = 0;
 		this.window = window;
+		
+		pluginManager = new PluginManager();
+		pluginLoader = new PluginLoader(pluginManager);
+		
 		setResponseMappings();
 	}
 
@@ -125,6 +134,7 @@ public class Server implements Runnable {
 	 */
 	public void run() {
 		try {
+			new Thread(pluginLoader).start();
 			this.welcomeSocket = new ServerSocket(port);
 			
 			// Now keep welcoming new connections until stop flag is set to true
@@ -173,6 +183,8 @@ public class Server implements Runnable {
 			
 			// We do not have any other job for this socket so just close it
 			socket.close();
+			
+			this.pluginLoader.stop();
 		}
 		catch(Exception e){}
 	}
