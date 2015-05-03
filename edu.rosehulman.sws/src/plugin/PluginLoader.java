@@ -1,31 +1,3 @@
-/*
- * PluginLoader.java
- * May 1, 2015
- *
- * Simple Web Server (SWS) for EE407/507 and CS455/555
- * 
- * Copyright (C) 2011 Chandan Raj Rupakheti, Clarkson University
- * 
- * This program is free software: you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License 
- * as published by the Free Software Foundation, either 
- * version 3 of the License, or any later version.
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/lgpl.html>.
- * 
- * Contact Us:
- * Chandan Raj Rupakheti (rupakhcr@clarkson.edu)
- * Department of Electrical and Computer Engineering
- * Clarkson University
- * Potsdam
- * NY 13699-5722
- * http://clarkson.edu/~rupakhcr
- */
- 
 package plugin;
 
 import java.io.File;
@@ -48,13 +20,10 @@ import org.json.JSONTokener;
 
 import servlet.Servlet;
 
-/**
- * 
- * @author Chandan R. Rupakheti (rupakhcr@clarkson.edu)
- */
 public class PluginLoader  implements Runnable{
 		public static final int POLL_INTERVAL = 5000;
 		public static final File PLUGIN_DIR = new File("plugins");
+		public static final SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yy HH:mm:SS ");
 		public boolean stop = false;
 		
 		private PluginManager pluginManager;
@@ -103,6 +72,7 @@ public class PluginLoader  implements Runnable{
 					File jarFile = new File(pluginDir.getPath() + "/" + pluginName + ".jar");
 					if(!jarFile.exists()){
 						System.out.println("ERROR " + pluginName + " does not exist");
+						continue;
 					}
 					
 					//attempt to close stream
@@ -110,6 +80,7 @@ public class PluginLoader  implements Runnable{
 						stream.close();
 					} catch (IOException e){
 						System.out.println("ERROR closing config.json stream");
+						continue;
 					}
 					
 					//check if it's been updated
@@ -183,7 +154,7 @@ public class PluginLoader  implements Runnable{
 		
 		@Override
 		public void run() {
-			SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yy HH:mm:SS ");
+			stop = false;
 			while(!stop){			
 				try {
 					System.out.println(formatter.format(new Date()));
