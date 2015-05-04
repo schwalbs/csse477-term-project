@@ -28,12 +28,13 @@
  
 package server;
 
+import plugin.Plugin;
+import plugin.Plugin.ServletNotFoundException;
 import plugin.PluginManager;
 import protocol.HttpRequest;
 import protocol.Protocol;
 import protocol.response.HttpResponseDecorator;
 import protocol.response.HttpResponseFactory;
-import servlet.Servlet;
 
 /**
  * 
@@ -47,18 +48,14 @@ public class Router {
 	
 	public void processRequest(HttpRequest request, HttpResponseDecorator decorator){
 		try {
-			Servlet servlet = this.pm.getServlet(this.constructKey(request));
+			Plugin plugin = this.pm.getPlugin(request.getRootUrl());
 			decorator.setResponse(HttpResponseFactory.createResponse(Protocol.OK_CODE, null, Protocol.CLOSE));
 			
-			servlet.process(request, decorator);
+			plugin.getServlet(request.getMethod(), request.getRelativeUrl()).process(request, decorator);
 		} catch (InstantiationException | IllegalAccessException e) {
 			decorator.setResponse(HttpResponseFactory.createResponse(Protocol.INTERNAL_SERVER_ERROR, null, Protocol.CLOSE));
-		} catch (NullPointerException e){
+		}catch (ServletNotFoundException | NullPointerException e) {
 			decorator.setResponse(HttpResponseFactory.createResponse(Protocol.NOT_FOUND_CODE, null, Protocol.CLOSE));
 		}
-	}
-	
-	public String constructKey(HttpRequest request){
-		return request.getMethod() + ":" + request.getUri();
 	}
 }

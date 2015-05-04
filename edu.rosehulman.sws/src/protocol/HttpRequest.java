@@ -61,6 +61,24 @@ public class HttpRequest {
 		return uri;
 	}
 
+	public String getRootUrl(){
+		String[] split = uri.split("/");
+		if(split.length < 2){
+			return "";
+		} else {
+			return "/" + split[1];
+		}
+	}
+	
+	public String getRelativeUrl(){
+		String[] split = uri.split("/");
+		if(split.length < 3){
+			return "";
+		} else {
+			return "/" + split[2];
+		}
+	}
+	
 	/**
 	 * The version of the http request.
 	 * @return the version

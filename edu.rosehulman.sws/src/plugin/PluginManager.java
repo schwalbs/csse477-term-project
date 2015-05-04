@@ -1,32 +1,25 @@
 package plugin;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import servlet.Servlet;
-
 public class PluginManager {
 	//key is combination of method:url
-	private Map<String, Class<? extends Servlet>> servletMap;
-	private ArrayList<String> installedPlugins;
+	private Map<String, Class<? extends Plugin>> pluginMap;
 	
 	public PluginManager(){
-		servletMap  = new HashMap<String, Class<? extends Servlet>>();
-		installedPlugins = new ArrayList<String>();
+		this.pluginMap  = new HashMap<String, Class<? extends Plugin>>();
 	}
 	
-	public void installPlugin(String pluginName, Map<String, Class<? extends Servlet>> map){
-		if(!installedPlugins.contains(pluginName))
-			installedPlugins.add(pluginName);
-		servletMap.putAll(map);
+	public void installPlugin(String pluginRoot, Class<? extends Plugin> toInstall){
+		this.pluginMap.put(pluginRoot, toInstall);
 	}
 	
-	public boolean isPluginInstalled(String pluginName){
-		return installedPlugins.contains(pluginName);
+	public boolean isPluginInstalled(String pluginRoot){
+		return this.pluginMap.containsKey(pluginRoot);
 	}
 	
-	public Servlet getServlet(String key) throws InstantiationException, IllegalAccessException, NullPointerException{
-			return servletMap.get(key).newInstance();
+	public Plugin getPlugin(String key) throws InstantiationException, IllegalAccessException, NullPointerException{
+			return pluginMap.get(key).newInstance();
 	}	
 }

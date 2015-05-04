@@ -2,7 +2,6 @@ package plugin;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -10,15 +9,11 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-
-import servlet.Servlet;
 
 public class PluginLoader  implements Runnable{
 		public static final int POLL_INTERVAL = 5000;
@@ -50,44 +45,56 @@ public class PluginLoader  implements Runnable{
 					
 					//make sure config file exists
 					File configFile = new File(pluginDir.getPath() + "/config.json");
-					String pluginName = pluginDir.getName();
 					if(!configFile.exists()){
-						System.out.println("ERROR config.json doesn't exist for plugin " + pluginName);
+						System.out.println("ERROR config.json doesn't exist for plugin folder " + pluginDir.getName());
 						continue;
 					}
 					
 					//load the input stream of the config file
-					InputStream stream;
+					InputStream stream = null;
+					File jarFile;
+					String pluginName, rootUrl;
+					JSONArray classes;
 					try {
 						stream = new FileInputStream(configFile);
-					} catch (FileNotFoundException e) {
-						System.out.println("ERROR reading config.json for plugin " + pluginName);
-						continue;
-					}
-					
-					//start going through and finding jars/ classes
-					JSONArray classes = (JSONArray) (new JSONTokener(stream)).nextValue();
-
-					//get the jar file and make sure it exists
-					File jarFile = new File(pluginDir.getPath() + "/" + pluginName + ".jar");
-					if(!jarFile.exists()){
-						System.out.println("ERROR " + pluginName + " does not exist");
-						continue;
-					}
-					
-					//attempt to close stream
-					try{
+						JSONObject config = (JSONObject) (new JSONTokener(stream)).nextValue();
+						
+						pluginName = config.getString("name");
+						rootUrl = config.getString("rootUrl");
+						
+						//get the jar file and make sure it exists
+						jarFile= new File(pluginDir.getPath() + "/" + config.getString("jar"));
+						if(!jarFile.exists()){
+							System.out.println("ERROR " + pluginName + " does not exist");
+							continue;
+						}
+						
+						
+						//check if it's been updated and not installed
+						System.out.println(pluginManager.isPluginInstalled(rootUrl));
+						System.out.println(jarFile.lastModified() + "\t" + lastChecked);
+						if(pluginManager.isPluginInstalled(rootUrl) && jarFile.lastModified() <= lastChecked){
+							System.out.println(pluginName + " already installed");
+							//attempt to close stream
+							try{
+								stream.close();
+							} catch (IOException e){
+								System.out.println("ERROR closing config.json stream");
+							}
+							continue;
+						}
+						
+						classes = config.getJSONArray("classes");
 						stream.close();
-					} catch (IOException e){
-						System.out.println("ERROR closing config.json stream");
+					} catch (IOException e) {
+						System.out.println("ERROR reading config.json for plugin folder " + pluginDir.getName());
 						continue;
-					}
-					
-					//check if it's been updated
-					if(pluginManager.isPluginInstalled(pluginName) && jarFile.lastModified() <= lastChecked){
-						System.out.println(pluginName + " already installed");
+					} catch (JSONException e){
+						System.out.println("ERROR config.json not formatted correctly. Requires objects: name, rootUrl, jar, classes");
+						try { stream.close(); } 
+						catch (IOException e1) {/*nothing to do*/}
 						continue;
-					}
+					} 					
 					
 					//create the class loader linked to the jar
 					URL[] jarURL;
@@ -100,28 +107,19 @@ public class PluginLoader  implements Runnable{
 					}
 					URLClassLoader jarClassLoader = new URLClassLoader(jarURL);
 
-					Map<String, Class<? extends Servlet>> map = new HashMap<String, Class<? extends Servlet>>();
 					for(int i=0; i<classes.length(); i++){
 						try{
 							//get the full class name (package and class name)
 							JSONObject clazz = classes.getJSONObject(i);
 							String classname = clazz.getString("classname");
 							try {
-								//load class
+								//load classes
 								Class<?> loaded = jarClassLoader.loadClass(classname);
-								
-								//make sure it's a servlet implementation and it has the correct annotations
-								if(loaded.newInstance() instanceof Servlet){
-									if(!loaded.isAnnotationPresent(Servlet.ServletDetails.class)){
-										System.out.println("ERROR " + loaded.getName() + " implements Servlet but doesn't have ServletDetails annotations");
-									} else {
-										Servlet.ServletDetails servletDetails = (Servlet.ServletDetails) loaded.getAnnotation(Servlet.ServletDetails.class);
-										
-										//add the patterns to the map with this class
-										for(String urlPattern : servletDetails.urlPatterns()){
-											map.put(servletDetails.method() + ":" + urlPattern, (Class<? extends Servlet>) loaded);											
-										}
-									}
+
+								//make sure it's a plugin implementation and it has the correct annotations
+								if(loaded.newInstance() instanceof Plugin){
+									this.pluginManager.installPlugin(rootUrl, (Class<? extends Plugin>)loaded);
+									System.out.println("SUCCESS " + pluginName + " installed successfully");
 								}
 							} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 								//Came accross an error, just continue
@@ -138,16 +136,11 @@ public class PluginLoader  implements Runnable{
 					try {
 						//try and close class loader
 						jarClassLoader.close();
-						
-						//install plugin on the pluginmanager
-						pluginManager.installPlugin(pluginName, map);
-						System.out.println("Successfully installed plugin " + pluginName);
 					} catch (IOException e) {
 						System.out.println("ERROR closing class loader on jar file " + jarFile.getName() + " in plugin " + pluginName);
 					} catch (Exception e){
 						System.out.println("ERROR installing plugin " + pluginName);
 					}
-					
 				}
 			}
 		}

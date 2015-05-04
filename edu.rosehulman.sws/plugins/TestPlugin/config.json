@@ -1,11 +1,19 @@
- [
-    {
-        "classname": "edu.rosehulman.extension.Util"
-    }, 
-    {
-        "classname": "edu.rosehulman.extension.GetDataHandler"
-    }, 
-    {
-        "classname": "edu.rosehulman.extension.PostDataHandler"
-    }
-]
+{
+	"name":"Test Plugin",
+	"rootUrl":"/test",
+	"jar":"TestPlugin.jar",
+	"classes":[
+	    {
+	        "classname": "edu.rosehulman.extension.Util"
+	    }, 
+	    {
+	        "classname": "edu.rosehulman.extension.GetDataHandler"
+	    }, 
+	    {
+	        "classname": "edu.rosehulman.extension.PostDataHandler"
+	    }, 
+	    {
+	        "classname": "edu.rosehulman.extension.DataPlugin"
+	    }
+	]
+}
