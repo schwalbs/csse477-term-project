@@ -58,6 +58,10 @@ public class Protocol {
     
     public static final int NOT_SUPPORTED_CODE = 505;
     public static final String NOT_SUPPORTED_TEXT = "HTTP Version Not Supported";
+    
+    public static final int INTERNAL_SERVER_ERROR = 500;
+    public static final String INTERNAL_SERVER_ERROR_TEXT = "Internal Server Error";
+
 
     // Some useful header elements in request
     public static final String HOST = "Host";

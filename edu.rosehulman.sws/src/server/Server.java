@@ -34,6 +34,7 @@ import protocol.response.HttpResponse200;
 import protocol.response.HttpResponse301;
 import protocol.response.HttpResponse400;
 import protocol.response.HttpResponse404;
+import protocol.response.HttpResponse500;
 import protocol.response.HttpResponse505;
 import protocol.response.HttpResponseFactory;
 
@@ -54,7 +55,7 @@ public class Server implements Runnable {
 	
 	private PluginManager pluginManager;
 	private PluginLoader pluginLoader;
-	
+	public Router router;
 	private WebServer window;
 	/**
 	 * @param rootDirectory
@@ -70,8 +71,9 @@ public class Server implements Runnable {
 		
 		pluginManager = new PluginManager();
 		pluginLoader = new PluginLoader(pluginManager);
+		router = new Router(pluginManager);
 		
-		setResponseMappings();
+		setMappings();
 	}
 
 	/**
@@ -158,11 +160,12 @@ public class Server implements Runnable {
 		}
 	}
 	
-	public void setResponseMappings(){
+	public void setMappings(){
 		HttpResponseFactory.addResponseType(Protocol.OK_CODE, HttpResponse200.class);
 		HttpResponseFactory.addResponseType(Protocol.MOVED_PERMANENTLY_CODE, HttpResponse301.class);
 		HttpResponseFactory.addResponseType(Protocol.BAD_REQUEST_CODE, HttpResponse400.class);
 		HttpResponseFactory.addResponseType(Protocol.NOT_FOUND_CODE, HttpResponse404.class);
+		HttpResponseFactory.addResponseType(Protocol.INTERNAL_SERVER_ERROR, HttpResponse500.class);
 		HttpResponseFactory.addResponseType(Protocol.NOT_SUPPORTED_CODE, HttpResponse505.class);
 	}
 	

@@ -21,8 +21,6 @@
  
 package server;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -32,8 +30,8 @@ import protocol.HttpRequestParser;
 import protocol.Protocol;
 import protocol.ProtocolException;
 import protocol.response.HttpResponse;
+import protocol.response.HttpResponseDecorator;
 import protocol.response.HttpResponseFactory;
-import protocol.response.HttpResponseWriter;
 
 /**
  * This class is responsible for handling a incoming request
@@ -93,7 +91,7 @@ public class ConnectionHandler implements Runnable {
 		// At this point we have the input and output stream of the socket
 		// Now lets create a HttpRequest object
 		HttpRequest request = null;
-		HttpResponse response = null;
+		HttpResponseDecorator decorator = new HttpResponseDecorator(null, Protocol.CLOSE);
 		try {
 			request = HttpRequestParser.read(inStream);
 			System.out.println(request);
@@ -104,162 +102,20 @@ public class ConnectionHandler implements Runnable {
 			// Protocol.BAD_REQUEST_CODE and Protocol.NOT_SUPPORTED_CODE
 			int status = pe.getStatus();
 			if(status == Protocol.BAD_REQUEST_CODE) {
-				response = HttpResponseFactory.createResponse(Protocol.BAD_REQUEST_CODE, null, Protocol.CLOSE);
+				decorator.setResponse(HttpResponseFactory.createResponse(Protocol.BAD_REQUEST_CODE, null, Protocol.CLOSE));
+				decorator.writeError();
+				return;
 			}
 			// TODO: Handle version not supported code as well
 		}
 		catch(Exception e) {
 			e.printStackTrace();
 			// For any other error, we will create bad request response as well
-			response = HttpResponseFactory.createResponse(Protocol.BAD_REQUEST_CODE, null, Protocol.CLOSE);
-		}
-		
-		if(response != null) {
-			// Means there was an error, now write the response object to the socket
-			try {
-				HttpResponseWriter.write(response, outStream);
-//				System.out.println(response);
-			}
-			catch(Exception e){
-				// We will ignore this exception
-				e.printStackTrace();
-			}
-
-			// Increment number of connections by 1
-			server.incrementConnections(1);
-			// Get the end time
-			long end = System.currentTimeMillis();
-			this.server.incrementServiceTime(end-start);
+			decorator.setResponse(HttpResponseFactory.createResponse(Protocol.BAD_REQUEST_CODE, null, Protocol.CLOSE));
+			decorator.writeError();
 			return;
 		}
-		
-		// We reached here means no error so far, so lets process further
-		try {
-			// Fill in the code to create a response for version mismatch.
-			// You may want to use constants such as Protocol.VERSION, Protocol.NOT_SUPPORTED_CODE, and more.
-			// You can check if the version matches as follows
-			if(!request.getVersion().equalsIgnoreCase(Protocol.VERSION)) {
-				// Here you checked that the "Protocol.VERSION" string is not equal to the  
-				// "request.version" string ignoring the case of the letters in both strings
-				// TODO: Fill in the rest of the code here
-			}
-			else if(request.getMethod().equalsIgnoreCase(Protocol.GET)) {				
-				// Handling GET request here
-				// Get relative URI path from request
-				String uri = request.getUri();
-				// Get root directory path from server
-				String rootDirectory = server.getRootDirectory();
-				// Combine them together to form absolute file path
-				File file = new File(rootDirectory + uri);
-				// Check if the file exists
-				if(file.exists()) {
-					if(file.isDirectory()) {
-						// Look for default index.html file in a directory
-						String location = rootDirectory + uri + System.getProperty("file.separator") + Protocol.DEFAULT_FILE;
-						file = new File(location);
-						if(file.exists()) {
-							// Lets create 200 OK response
-							response = HttpResponseFactory.createResponse(Protocol.OK_CODE, file, Protocol.CLOSE);
-						}
-						else {
-							// File does not exist so lets create 404 file not found code
-							response = HttpResponseFactory.createResponse(Protocol.NOT_FOUND_CODE, null, Protocol.CLOSE);
-						}
-					}
-					else { // Its a file
-						// Lets create 200 OK response
-						response = HttpResponseFactory.createResponse(Protocol.OK_CODE, file, Protocol.CLOSE);
-					}
-				}
-				else {
-					// File does not exist so lets create 404 file not found code
-					response = HttpResponseFactory.createResponse(Protocol.NOT_FOUND_CODE, null, Protocol.CLOSE);
-				}
-				
-			}
-			else if(request.getMethod().equalsIgnoreCase(Protocol.POST)) {				
-				// Handling POST request here
-				// Get relative URI path from request
-				String uri = request.getUri();
-				// Get root directory path from server
-				String rootDirectory = server.getRootDirectory();
-				// Combine them together to form absolute file path
-				File file = new File(rootDirectory + uri);
-				
-				if(!file.isDirectory()){
-					FileWriter writer = new FileWriter(file, false);
-					writer.write(request.getBody());
-					writer.close();
-					response = HttpResponseFactory.createResponse(Protocol.OK_CODE, null, Protocol.CLOSE);
-				} else {
-					response = HttpResponseFactory.createResponse(Protocol.NOT_FOUND_CODE, null, Protocol.CLOSE);
-				}
-			}
-			else if(request.getMethod().equalsIgnoreCase(Protocol.PUT)) {
-				// Handling GET request here
-				// Get relative URI path from request
-				String uri = request.getUri();
-				// Get root directory path from server
-				String rootDirectory = server.getRootDirectory();
-				// Combine them together to form absolute file path
-				File file = new File(rootDirectory + uri);
-				// Check if the file exists
-				if(!file.isDirectory()){
-					FileWriter writer = new FileWriter(file, true);
-					writer.write(request.getBody());
-					writer.close();
-					response = HttpResponseFactory.createResponse(Protocol.OK_CODE, null, Protocol.CLOSE);
-				} else {
-					response = HttpResponseFactory.createResponse(Protocol.NOT_FOUND_CODE, null, Protocol.CLOSE);
-				}
-				
-				
-			}
-			else if(request.getMethod().equalsIgnoreCase(Protocol.DELETE)) {
-				// Handling DELETE request here
-				// Get relative URI path from request
-				String uri = request.getUri();
-				// Get root directory path from server
-				String rootDirectory = server.getRootDirectory();
-				// Combine them together to form absolute file path
-				File file = new File(rootDirectory + uri);
-				// Check if the file exists
-				if(file.exists()){
-					if(file.isFile() && file.delete()){
-						response = HttpResponseFactory.createResponse(Protocol.OK_CODE, null, Protocol.CLOSE);						
-					}
-				} else {
-					response = HttpResponseFactory.createResponse(Protocol.NOT_FOUND_CODE, null, Protocol.CLOSE);					
-				}
-			}
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
-		
-
-		// TODO: So far response could be null for protocol version mismatch.
-		// So this is a temporary patch for that problem and should be removed
-		// after a response object is created for protocol version mismatch.
-		if(response == null) {
-			response = HttpResponseFactory.createResponse(Protocol.BAD_REQUEST_CODE, null, Protocol.CLOSE);
-		}
-		
-		try{
-			// Write response and we are all done so close the socket
-			HttpResponseWriter.write(response, outStream);
-//			System.out.println(response);
-			socket.close();
-		}
-		catch(Exception e){
-			// We will ignore this exception
-			e.printStackTrace();
-		} 
-		
-		// Increment number of connections by 1
-		server.incrementConnections(1);
-		// Get the end time
-		long end = System.currentTimeMillis();
-		this.server.incrementServiceTime(end-start);
+		this.server.router.processRequest(request, decorator);
+		decorator.flush();
 	}
 }

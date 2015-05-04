@@ -58,11 +58,7 @@ public class PluginManager {
 		return installedPlugins.contains(pluginName);
 	}
 	
-	public Servlet getServlet(String key){
-		try {
+	public Servlet getServlet(String key) throws InstantiationException, IllegalAccessException, NullPointerException{
 			return servletMap.get(key).newInstance();
-		} catch (InstantiationException | IllegalAccessException | NullPointerException e) {
-			return null;
-		}
 	}	
 }
