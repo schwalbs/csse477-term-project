@@ -6,10 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import protocol.HttpRequest;
-import protocol.response.HttpResponse;
+import protocol.response.HttpResponseDecorator;
 
 public interface Servlet {
-	public void process(HttpRequest request, HttpResponse response);
+	public void process(HttpRequest request, HttpResponseDecorator decorator);
 	
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)

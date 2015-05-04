@@ -21,6 +21,7 @@
  
 package server;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -92,6 +93,7 @@ public class ConnectionHandler implements Runnable {
 		// Now lets create a HttpRequest object
 		HttpRequest request = null;
 		HttpResponseDecorator decorator = new HttpResponseDecorator(null, Protocol.CLOSE);
+		decorator.setOutputStream(outStream);
 		try {
 			request = HttpRequestParser.read(inStream);
 			System.out.println(request);
@@ -117,5 +119,10 @@ public class ConnectionHandler implements Runnable {
 		}
 		this.server.router.processRequest(request, decorator);
 		decorator.flush();
+		try {
+			this.socket.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

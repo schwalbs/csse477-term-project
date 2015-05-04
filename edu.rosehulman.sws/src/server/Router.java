@@ -48,6 +48,9 @@ public class Router {
 	public void processRequest(HttpRequest request, HttpResponseDecorator decorator){
 		try {
 			Servlet servlet = this.pm.getServlet(this.constructKey(request));
+			decorator.setResponse(HttpResponseFactory.createResponse(Protocol.OK_CODE, null, Protocol.CLOSE));
+			
+			servlet.process(request, decorator);
 		} catch (InstantiationException | IllegalAccessException e) {
 			decorator.setResponse(HttpResponseFactory.createResponse(Protocol.INTERNAL_SERVER_ERROR, null, Protocol.CLOSE));
 		} catch (NullPointerException e){

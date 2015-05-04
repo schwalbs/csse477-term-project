@@ -1,0 +1,11 @@
+ [
+    {
+        "classname": "edu.rosehulman.extension.Util"
+    }, 
+    {
+        "classname": "edu.rosehulman.extension.GetDataHandler"
+    }, 
+    {
+        "classname": "edu.rosehulman.extension.PostDataHandler"
+    }
+]
