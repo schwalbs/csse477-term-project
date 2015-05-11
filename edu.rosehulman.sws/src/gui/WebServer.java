@@ -27,10 +27,25 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SpringLayout;
+import javax.swing.WindowConstants;
+
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.ExecuteException;
+import org.apache.commons.exec.ExecuteWatchdog;
 
 import server.Server;
+import server.ServerExecutor;
 
 /**
  * The application window for the {@link Server}, where you can update
@@ -166,36 +181,7 @@ public class WebServer extends JFrame {
 		// Add action for run server
 		this.butStartServer.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(server != null && !server.isStoped()) {
-					JOptionPane.showMessageDialog(WebServer.this, "The web server is still running, try again later.", "Server Still Running Error", JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-				
-				// Read port number
-				int port = 80;
-				try {
-					port = Integer.parseInt(WebServer.this.txtPortNumber.getText());
-				}
-				catch(Exception ex) {
-					JOptionPane.showMessageDialog(WebServer.this, "Invalid Port Number!", "Web Server Input Error", JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-				
-				// Get hold of the root directory
-				String rootDirectory = WebServer.this.txtRootDirectory.getText();
-				
-				// Now run the server in non-gui thread
-				server = new Server(rootDirectory, port, WebServer.this);
-				rateUpdater = new ServiceRateUpdater();
-				
-				// Disable widgets
-				WebServer.this.disableWidgets();
-				
-				// Now run the server in a separate thread
-				new Thread(server).start();
-				
-				// Also run the service rate updater thread
-				new Thread(rateUpdater).start();
+				startServer();
 			}
 		});
 		
@@ -219,6 +205,39 @@ public class WebServer extends JFrame {
 					rateUpdater.stop = true;
 			}
 		});
+	}
+	
+	public void startServer(){
+		if(server != null && !server.isStoped()) {
+			JOptionPane.showMessageDialog(WebServer.this, "The web server is still running, try again later.", "Server Still Running Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
+		// Read port number
+		int port = 80;
+		try {
+			port = Integer.parseInt(WebServer.this.txtPortNumber.getText());
+		}
+		catch(Exception ex) {
+			JOptionPane.showMessageDialog(WebServer.this, "Invalid Port Number!", "Web Server Input Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
+		// Get hold of the root directory
+		String rootDirectory = WebServer.this.txtRootDirectory.getText();
+		
+		// Now run the server in non-gui thread
+		server = new Server(rootDirectory, port, WebServer.this);
+		rateUpdater = new ServiceRateUpdater();
+		
+		// Disable widgets
+		WebServer.this.disableWidgets();
+		
+		// Now run the server in a separate thread
+		new Thread(server).start();
+
+		// Also run the service rate updater thread
+		new Thread(rateUpdater).start();
 	}
 	
 	private void disableWidgets() {
