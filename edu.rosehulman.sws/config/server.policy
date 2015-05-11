@@ -1,0 +1,8 @@
+/* AUTOMATICALLY GENERATED ON Sun May 10 23:52:24 EDT 2015*/
+/* DO NOT EDIT */
+
+grant {
+  permission java.io.FilePermission "plugins/*", "read";
+  permission java.io.FilePermission "web/*", "read, write, delete";
+};
+

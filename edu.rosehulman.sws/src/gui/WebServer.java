@@ -166,36 +166,7 @@ public class WebServer extends JFrame {
 		// Add action for run server
 		this.butStartServer.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(server != null && !server.isStoped()) {
-					JOptionPane.showMessageDialog(WebServer.this, "The web server is still running, try again later.", "Server Still Running Error", JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-				
-				// Read port number
-				int port = 80;
-				try {
-					port = Integer.parseInt(WebServer.this.txtPortNumber.getText());
-				}
-				catch(Exception ex) {
-					JOptionPane.showMessageDialog(WebServer.this, "Invalid Port Number!", "Web Server Input Error", JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-				
-				// Get hold of the root directory
-				String rootDirectory = WebServer.this.txtRootDirectory.getText();
-				
-				// Now run the server in non-gui thread
-				server = new Server(rootDirectory, port, WebServer.this);
-				rateUpdater = new ServiceRateUpdater();
-				
-				// Disable widgets
-				WebServer.this.disableWidgets();
-				
-				// Now run the server in a separate thread
-				new Thread(server).start();
-				
-				// Also run the service rate updater thread
-				new Thread(rateUpdater).start();
+				startServer();
 			}
 		});
 		
@@ -220,7 +191,38 @@ public class WebServer extends JFrame {
 			}
 		});
 	}
-	
+	public void startServer(){
+		if(server != null && !server.isStoped()) {
+			JOptionPane.showMessageDialog(WebServer.this, "The web server is still running, try again later.", "Server Still Running Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
+		// Read port number
+		int port = 80;
+		try {
+			port = Integer.parseInt(WebServer.this.txtPortNumber.getText());
+		}
+		catch(Exception ex) {
+			JOptionPane.showMessageDialog(WebServer.this, "Invalid Port Number!", "Web Server Input Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
+		// Get hold of the root directory
+		String rootDirectory = WebServer.this.txtRootDirectory.getText();
+		
+		// Now run the server in non-gui thread
+		server = new Server(rootDirectory, port, WebServer.this);
+		rateUpdater = new ServiceRateUpdater();
+		
+		// Disable widgets
+		WebServer.this.disableWidgets();
+		
+		// Now run the server in a separate thread
+		new Thread(server).start();
+
+		// Also run the service rate updater thread
+		new Thread(rateUpdater).start();
+	}
 	private void disableWidgets() {
 		this.txtPortNumber.setEnabled(false);
 		this.butSelect.setEnabled(false);
