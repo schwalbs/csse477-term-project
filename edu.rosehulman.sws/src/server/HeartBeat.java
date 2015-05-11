@@ -74,7 +74,7 @@ public class HeartBeat {
 		  } catch (Exception e) {
 			System.out.println("Server is down!\nRestarting Server");
 			try {
-				Runtime.getRuntime().exec("java -jar ../../StartServer.jar");
+				Runtime.getRuntime().exec("java -jar StartServer.jar");
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
