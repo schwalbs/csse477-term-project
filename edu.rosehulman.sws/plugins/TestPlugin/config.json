@@ -4,16 +4,16 @@
 	"jar":"TestPlugin.jar",
 	"classes":[
 	    {
-	        "classname": "edu.rosehulman.extension.Util"
+	        "classname": "Util"
 	    }, 
 	    {
-	        "classname": "edu.rosehulman.extension.GetDataHandler"
+	        "classname": "GetDataHandler"
 	    }, 
 	    {
-	        "classname": "edu.rosehulman.extension.PostDataHandler"
+	        "classname": "PostDataHandler"
 	    }, 
 	    {
-	        "classname": "edu.rosehulman.extension.DataPlugin"
+	        "classname": "DataPlugin"
 	    }
 	]
 }

@@ -152,6 +152,8 @@ public class Server implements Runnable {
 				// Create a handler for this incoming connection and start the handler in a new thread
 				ConnectionHandler handler = new ConnectionHandler(this, connectionSocket);
 				new Thread(handler).start();
+				//RequestHandler requestHandler = new RequestHandler(this, connectionSocket, handler.getQueue());
+				//new Thread(requestHandler).start();
 			}
 			this.welcomeSocket.close();
 		}

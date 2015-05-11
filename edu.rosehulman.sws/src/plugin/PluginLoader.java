@@ -115,7 +115,8 @@ public class PluginLoader  implements Runnable{
 							try {
 								//load classes
 								Class<?> loaded = jarClassLoader.loadClass(classname);
-
+								
+								System.out.println(classname);
 								//make sure it's a plugin implementation and it has the correct annotations
 								if(loaded.newInstance() instanceof Plugin){
 									this.pluginManager.installPlugin(rootUrl, (Class<? extends Plugin>)loaded);
