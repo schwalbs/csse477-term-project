@@ -107,7 +107,6 @@ public class ConnectionHandler implements Runnable {
 				decorator.writeError();
 				return;
 			}
-			// TODO: Handle version not supported code as well
 		}
 		catch(Exception e) {
 			e.printStackTrace();

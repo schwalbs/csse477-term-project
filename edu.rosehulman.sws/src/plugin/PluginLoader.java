@@ -71,8 +71,6 @@ public class PluginLoader  implements Runnable{
 						
 						
 						//check if it's been updated and not installed
-						System.out.println(pluginManager.isPluginInstalled(rootUrl));
-						System.out.println(jarFile.lastModified() + "\t" + lastChecked);
 						if(pluginManager.isPluginInstalled(rootUrl) && jarFile.lastModified() <= lastChecked){
 							System.out.println(pluginName + " already installed");
 							//attempt to close stream
@@ -116,7 +114,6 @@ public class PluginLoader  implements Runnable{
 								//load classes
 								Class<?> loaded = jarClassLoader.loadClass(classname);
 								
-								System.out.println(classname);
 								//make sure it's a plugin implementation and it has the correct annotations
 								if(loaded.newInstance() instanceof Plugin){
 									this.pluginManager.installPlugin(rootUrl, (Class<? extends Plugin>)loaded);

@@ -1,24 +1,3 @@
-/*
- * Server.java
- * Oct 7, 2012
- *
- * Simple Web Server (SWS) for CSSE 477
- * 
- * Copyright (C) 2012 Chandan Raj Rupakheti
- * 
- * This program is free software: you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License 
- * as published by the Free Software Foundation, either 
- * version 3 of the License, or any later version.
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/lgpl.html>.
- * 
- */
- 
 package server;
 
 import gui.WebServer;
@@ -26,6 +5,7 @@ import gui.WebServer;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import plugin.PluginLoader;
 import plugin.PluginManager;
@@ -52,7 +32,9 @@ public class Server implements Runnable {
 	
 	private long connections;
 	private long serviceTime;
-	
+
+	private ArrayList<InetAddress> blacklist;
+	private RequestRateChecker blc;
 	private PluginManager pluginManager;
 	private PluginLoader pluginLoader;
 	public Router router;
@@ -69,6 +51,8 @@ public class Server implements Runnable {
 		this.serviceTime = 0;
 		this.window = window;
 		
+		blacklist = new ArrayList<>();
+		blc = new RequestRateChecker(this);
 		pluginManager = new PluginManager();
 		pluginLoader = new PluginLoader(pluginManager);
 		router = new Router(pluginManager);
@@ -119,6 +103,10 @@ public class Server implements Runnable {
 		this.connections += value;
 	}
 	
+	public void addToBlacklist(InetAddress toBlacklist){
+		this.blacklist.add(toBlacklist);
+	}
+	
 	/**
 	 * Increments the service time by the supplied value.
 	 * Synchronized to be used in threaded environment.
@@ -137,14 +125,23 @@ public class Server implements Runnable {
 	public void run() {
 		try {
 			new Thread(pluginLoader).start();
-			this.welcomeSocket = new ServerSocket(port);
+			new Thread(blc).start();
 			
+			this.welcomeSocket = new ServerSocket(port);
+			this.welcomeSocket.getInetAddress();
 			// Now keep welcoming new connections until stop flag is set to true
 			while(true) {
 				// Listen for incoming socket connection
 				// This method block until somebody makes a request
 				Socket connectionSocket = this.welcomeSocket.accept();
+				this.blc.addToMap(connectionSocket.getInetAddress());
 				
+				
+				if(this.blacklist.contains(connectionSocket.getInetAddress())){
+					connectionSocket.close();
+					continue;
+				}
+
 				// Come out of the loop if the stop flag is set
 				if(this.stop)
 					break;
@@ -171,7 +168,6 @@ public class Server implements Runnable {
 		HttpResponseFactory.addResponseType(Protocol.NOT_SUPPORTED_CODE, HttpResponse505.class);
 	}
 	
-	
 	/**
 	 * Stops the server from listening further.
 	 */
@@ -179,6 +175,7 @@ public class Server implements Runnable {
 		if(this.stop)
 			return;
 		
+
 		// Set the stop flag to be true
 		this.stop = true;
 		try {

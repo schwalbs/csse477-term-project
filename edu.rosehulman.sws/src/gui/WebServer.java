@@ -240,6 +240,7 @@ public class WebServer extends JFrame {
 	 * @param e
 	 */
 	public void showSocketException(Exception e) {
+		e.printStackTrace();
 		JOptionPane.showMessageDialog(this, e.getMessage(), "Web Server Socket Problem", JOptionPane.ERROR_MESSAGE);
 		if(this.server != null)
 			this.server.stop();

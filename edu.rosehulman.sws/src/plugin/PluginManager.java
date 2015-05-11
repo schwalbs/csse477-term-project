@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PluginManager {
-	//key is combination of method:url
 	private Map<String, Class<? extends Plugin>> pluginMap;
 	
 	public PluginManager(){
@@ -20,6 +19,13 @@ public class PluginManager {
 	}
 	
 	public Plugin getPlugin(String key) throws InstantiationException, IllegalAccessException, NullPointerException{
-			return pluginMap.get(key).newInstance();
-	}	
+		Plugin plugin = null;
+		for(String k : pluginMap.keySet()){
+			if(key.matches(k)){
+				plugin = pluginMap.get(k).newInstance();
+			}
+		}
+		return plugin;
+	}
+	
 }
