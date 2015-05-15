@@ -1,0 +1,16 @@
+{
+	"name":"Text Editor Plugin",
+	"rootUrl":"/txteditor",
+	"jar":"TxtEditorAPI.jar",
+	"classes":[
+	    {
+	        "classname": "edu.rosehulman.txteditorapi.IndexServlet"
+	    },
+	    {
+	        "classname": "edu.rosehulman.txteditorapi.HelloServlet"
+	    },
+	    {
+	        "classname": "edu.rosehulman.txteditorapi.TxtEditorAPIPlugin"
+	    }
+	]
+}

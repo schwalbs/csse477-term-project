@@ -1,0 +1,22 @@
+{
+	"name":"Static Files",
+	"rootUrl":"^/(\\w)+\\.([A-Za-z])+$",
+	"jar":"StaticFiles.jar",
+	"classes":[
+	    {
+	        "classname": "edu.rosehulman.staticfiles.GetStaticFileServlet"
+	    }, 
+	    {
+	        "classname": "edu.rosehulman.staticfiles.PostStaticFileServlet"
+	    }, 
+	    {
+	        "classname": "edu.rosehulman.staticfiles.PutStaticFileServlet"
+	    }, 
+	    {
+	        "classname": "edu.rosehulman.staticfiles.DeleteStaticFileServlet"
+	    }, 
+	    {
+	        "classname": "edu.rosehulman.staticfiles.StaticFilePlugin"
+	    }
+	]
+}

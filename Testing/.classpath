@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="lib" path="E:/Programs/Eclipse Luna JEE/plugins/org.eclipse.core.runtime_3.10.0.v20140318-2214.jar" sourcepath="E:/Programs/Eclipse Luna JEE/plugins/org.eclipse.core.runtime_3.10.0.v20140318-2214.jar">
+		<accessrules>
+			<accessrule kind="discouraged" pattern="org/eclipse/core/internal/preferences/legacy/*"/>
+			<accessrule kind="discouraged" pattern="org/eclipse/core/internal/runtime/*"/>
+			<accessrule kind="accessible" pattern="org/eclipse/core/runtime/*"/>
+			<accessrule ignoreifbetter="true" kind="nonaccessible" pattern="**/*"/>
+		</accessrules>
+	</classpathentry>
+	<classpathentry kind="lib" path="libs/json-20141113.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/edu.rosehulman.sws"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

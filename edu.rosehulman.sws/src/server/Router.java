@@ -25,7 +25,9 @@ public class Router {
 		try {
 			Plugin plugin = this.pm.getPlugin(request.getRootUrl());
 			decorator.setResponse(HttpResponseFactory.createResponse(Protocol.OK_CODE, null, Protocol.CLOSE));
-
+			
+			System.out.println("METHOD:" + request.getMethod());
+			System.out.println("RELATIVE:" + request.getRelativeUrl());
 			Servlet serv = plugin.getServlet(request.getMethod(), request.getRelativeUrl());
 			serv.set(request, decorator);
 			
