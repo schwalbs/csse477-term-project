@@ -75,7 +75,13 @@ public class HttpRequest {
 		if(split.length < 3){
 			return "";
 		} else {
-			return "/" + split[2];
+			int i;
+			String result = "";
+			for(i=2; i < split.length; i ++){
+				result+="/";
+				result+=split[i];
+			}
+			return result;
 		}
 	}
 	

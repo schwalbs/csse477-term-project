@@ -9,6 +9,21 @@
 	    {
 	        "classname": "edu.rosehulman.txteditorapi.HelloServlet"
 	    },
+		{
+	        "classname": "edu.rosehulman.txteditorapi.GetAllServlet"
+	    },
+		{
+	        "classname": "edu.rosehulman.txteditorapi.GetFileServlet"
+	    },
+		{
+	        "classname": "edu.rosehulman.txteditorapi.DeleteFileServlet"
+	    },
+		{
+	        "classname": "edu.rosehulman.txteditorapi.CreateFileServlet"
+	    },
+		{
+	        "classname": "edu.rosehulman.txteditorapi.PostEditServlet"
+	    },
 	    {
 	        "classname": "edu.rosehulman.txteditorapi.TxtEditorAPIPlugin"
 	    }

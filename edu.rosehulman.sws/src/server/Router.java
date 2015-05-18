@@ -2,6 +2,7 @@ package server;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import plugin.Plugin;
 import plugin.Plugin.ServletNotFoundException;
@@ -25,18 +26,18 @@ public class Router {
 		try {
 			Plugin plugin = this.pm.getPlugin(request.getRootUrl());
 			decorator.setResponse(HttpResponseFactory.createResponse(Protocol.OK_CODE, null, Protocol.CLOSE));
-			
+
 			System.out.println("METHOD:" + request.getMethod());
 			System.out.println("RELATIVE:" + request.getRelativeUrl());
 			Servlet serv = plugin.getServlet(request.getMethod(), request.getRelativeUrl());
 			serv.set(request, decorator);
-			
-			serv.run();
-//			this.executor.submit(serv);
-//			try {
-//				f.get();
-//			} catch (Exception e) {
-//			}
+
+			// serv.run();
+			Future f = this.executor.submit(serv);
+			try {
+				f.get();
+			} catch (Exception e) {
+			}
 		} catch (InstantiationException | IllegalAccessException e) {
 			decorator.setResponse(HttpResponseFactory.createResponse(Protocol.INTERNAL_SERVER_ERROR, null,
 					Protocol.CLOSE));
